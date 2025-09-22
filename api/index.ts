@@ -9,17 +9,16 @@ app.use(express.urlencoded({ extended: false }));
 // Health check
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
-// Serve static files from the built frontend (dist)
-const distPath = path.join(__dirname, '..', 'dist');
+const OUT_DIR = process.env.OUT_DIR || 'dist';
+const distPath = path.join(__dirname, '..', OUT_DIR);
 app.use(express.static(distPath));
 
-// SPA fallback (non-API routes)
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(distPath, 'index.html'), err => {
-    if (err) next();
+    if (err) next(err);
   });
 });
 
-export const config = { runtime: 'nodejs18.x' };
+export const config = { runtime: 'nodejs' };
 export default serverless(app);
